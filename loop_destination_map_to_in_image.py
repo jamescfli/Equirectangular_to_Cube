@@ -1,5 +1,5 @@
 import cv2
-from PIL import Image
+from PIL import Image as pil_image
 from math import pi,sin,cos,tan,atan2,hypot,floor
 import numpy as np
 
@@ -76,47 +76,76 @@ def convert_back(imgIn, imgOut):
             outPix[i,j] = (int(round(r)),int(round(g)),int(round(b)))
 
 
-def convert_back_cv2_wrapper(in_img_cv2):    # both input and output in cv2 format
-    cv2_im = cv2.cvtColor(in_img_cv2,cv2.COLOR_BGR2RGB)
-    imgIn = Image.fromarray(cv2_im)
+def convert_back_cv2_wrapper(in_img_cv2):   # without cv2 package
+    imgIn = pil_image.fromarray(in_img_cv2[:, :, ::-1].astype('uint8'), 'RGB')
+    # imgIn.save('Output_Images/1_pil_image.jpg')   # debug
     inSize = imgIn.size
-    imgOut = Image.new("RGB",(inSize[0],inSize[0]*3/4),"black")
+    imgOut = pil_image.new("RGB",(inSize[0],inSize[0]*3/4),"black")
     convert_back(imgIn, imgOut)
-    out_img_cv2 = np.array(imgOut)      # auto convert to 512x1024
-    # out_img_cv2 = out_img_cv2[:, :, ::-1].copy()    # RGB to BGR
-    out_img_cv2 = cv2.cvtColor(out_img_cv2, cv2.COLOR_RGB2BGR)
-    return out_img_cv2
+    # imgOut.save('Output_Images/2_pil_image.jpg')  # debug
+    imgOut = np.array(imgOut)[:, :, ::-1].copy()
+    return imgOut
+
+
+def convert_back_array_wrapper(in_img_array):   # no RGB BGR conversion
+    imgIn = pil_image.fromarray(in_img_array, 'RGB')
+    # imgIn.save('Output_Images/1_pil_image.jpg')   # debug
+    inSize = imgIn.size
+    imgOut = pil_image.new("RGB",(inSize[0],inSize[0]*3/4),"black")
+    convert_back(imgIn, imgOut)
+    # imgOut.save('Output_Images/2_pil_image.jpg')  # debug
+    imgOut = np.array(imgOut).copy()
+    return imgOut
+
+
+def cut_top_face(in_img_6face_cube):
+    img_height = in_img_6face_cube.shape[0]
+    src_img_height = img_height/6*4
+    img_top = in_img_6face_cube[0:(src_img_height / 2), (src_img_height / 2 * 2):(src_img_height / 2 * 3), :]
+    return img_top
+
+
+def cut_body_part(in_img_origin):
+    src_img_height = in_img_origin.shape[0]
+    return in_img_origin[(src_img_height / 4):(src_img_height * 3 / 4), :, :]
 
 
 if __name__ == "__main__":
-    # PIL Image
-    imgIn = Image.open('Equi_Images/livingroom_1024x512.jpg')       # 1024x512, width goes first
-    inSize = imgIn.size
-    imgOut = Image.new("RGB",(inSize[0],inSize[0]*3/4),"black")
-    convert_back(imgIn, imgOut)
-    imgOut.save('Output_Images/des_to_source_back_convert.jpg')
-    imgOut.show()
+    # # PIL Image
+    # imgIn = Image.open('Equi_Images/livingroom_1024x512.jpg')       # 1024x512, width goes first
+    # inSize = imgIn.size
+    # imgOut = Image.new("RGB",(inSize[0],inSize[0]*3/4),"black")
+    # convert_back(imgIn, imgOut)
+    # imgOut.save('Output_Images/des_to_source_back_convert.jpg')
+    # imgOut.show()
+    #
+    # # OpenCV
+    # imgIn = cv2.imread('Equi_Images/livingroom_1024x512.jpg', cv2.IMREAD_COLOR)
+    # src_img_height = 256    # 256 ~ display, 512 ~ save
+    # imgIn = cv2.resize(imgIn, (src_img_height * 2, src_img_height), interpolation=cv2.INTER_AREA)
+    # imgOut = convert_back_cv2_wrapper(imgIn)
+    # cv2.startWindowThread()
+    # cv2.namedWindow("Face Feature Extraction", cv2.WINDOW_NORMAL)
+    # cv2.setWindowProperty("Face Feature Extraction", cv2.WND_PROP_AUTOSIZE, cv2.WINDOW_AUTOSIZE)
+    # while True:
+    #     cv2.imshow('Face Feature Extraction', np.vstack((imgIn, imgOut)))
+    #     k = cv2.waitKey(1000) & 0xff
+    #     if k == ord('q'):
+    #         break
+    # cv2.imwrite('Output_Images/des_to_source_back_convert.jpg', np.vstack((imgIn, imgOut)))
+    # cv2.destroyAllWindows()
+    #
+    # # OpenCV get the top
+    # imgIn = cv2.imread('Equi_Images/livingroom_1024x512.jpg', cv2.IMREAD_COLOR)
+    # # src_img_height = 512    # 256 ~ display, 512 ~ save
+    # # imgIn = cv2.resize(imgIn, (src_img_height * 2, src_img_height), interpolation=cv2.INTER_AREA)
+    # imgOut = convert_back_cv2_wrapper(imgIn)
+    # img_top = imgOut[0:src_img_height / 2, (src_img_height / 2 * 2):(src_img_height / 2 * 3), :]
+    # cv2.imwrite('Output_Images/cube_top.jpg', img_top)
 
-    # OpenCV
-    imgIn = cv2.imread('Equi_Images/livingroom_1024x512.jpg', cv2.IMREAD_COLOR)
-    src_img_height = 256    # 256 ~ display, 512 ~ save
-    imgIn = cv2.resize(imgIn, (src_img_height * 2, src_img_height), interpolation=cv2.INTER_AREA)
-    imgOut = convert_back_cv2_wrapper(imgIn)
-    cv2.startWindowThread()
-    cv2.namedWindow("Face Feature Extraction", cv2.WINDOW_NORMAL)
-    cv2.setWindowProperty("Face Feature Extraction", cv2.WND_PROP_AUTOSIZE, cv2.WINDOW_AUTOSIZE)
-    while True:
-        cv2.imshow('Face Feature Extraction', np.vstack((imgIn, imgOut)))
-        k = cv2.waitKey(1000) & 0xff
-        if k == ord('q'):
-            break
-    cv2.imwrite('Output_Images/des_to_source_back_convert.jpg', np.vstack((imgIn, imgOut)))
-    cv2.destroyAllWindows()
-
-    # OpenCV get the top
+    # cv2 wrapper by array not cv2 package
     imgIn = cv2.imread('Equi_Images/livingroom_1024x512.jpg', cv2.IMREAD_COLOR)
     # src_img_height = 512    # 256 ~ display, 512 ~ save
     # imgIn = cv2.resize(imgIn, (src_img_height * 2, src_img_height), interpolation=cv2.INTER_AREA)
-    imgOut = convert_back_cv2_wrapper(imgIn)
-    img_top = imgOut[0:src_img_height / 2, (src_img_height / 2 * 2):(src_img_height / 2 * 3), :]
-    cv2.imwrite('Output_Images/cube_top.jpg', img_top)
+    imgOut = convert_back_array_wrapper(imgIn)
+    cv2.imwrite('Output_Images/3_cube_faces.jpg', imgOut)
