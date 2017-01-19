@@ -1,4 +1,4 @@
-import cv2
+# import cv2
 from PIL import Image as pil_image
 from math import pi,sin,cos,tan,atan2,hypot,floor
 import numpy as np
@@ -143,9 +143,11 @@ if __name__ == "__main__":
     # img_top = imgOut[0:src_img_height / 2, (src_img_height / 2 * 2):(src_img_height / 2 * 3), :]
     # cv2.imwrite('Output_Images/cube_top.jpg', img_top)
 
-    # cv2 wrapper by array not cv2 package
-    imgIn = cv2.imread('Equi_Images/livingroom_1024x512.jpg', cv2.IMREAD_COLOR)
-    # src_img_height = 512    # 256 ~ display, 512 ~ save
-    # imgIn = cv2.resize(imgIn, (src_img_height * 2, src_img_height), interpolation=cv2.INTER_AREA)
-    imgOut = convert_back_array_wrapper(imgIn)
-    cv2.imwrite('Output_Images/3_cube_faces.jpg', imgOut)
+    # # cv2 wrapper by array not cv2 package
+    # imgIn = cv2.imread('Equi_Images/livingroom_1024x512.jpg', cv2.IMREAD_COLOR)
+    # # src_img_height = 512    # 256 ~ display, 512 ~ save
+    # # imgIn = cv2.resize(imgIn, (src_img_height * 2, src_img_height), interpolation=cv2.INTER_AREA)
+    # imgOut = convert_back_array_wrapper(imgIn)
+    # cv2.imwrite('Output_Images/3_cube_faces.jpg', imgOut)
+    pass
+
